@@ -5,21 +5,29 @@
 
 import urllib.request as ur
 import urllib.parse as up
-import sys
+import sys, os, requests
 
 def sendPhoto(url, channel, api_token, caption = "New Post :)"):
-	r = ur.urlopen("https://api.telegram.org/bot"+api_token+"/sendPhoto?", up.urlencode({"chat_id": channel, "photo": url, "caption": caption}).encode("utf-8")).read()
+	if os.path.isfile(url):
+		print("Found local file: " + url)
+		r = requests.post("https://api.telegram.org/bot"+api_token+"/sendPhoto?", data={"chat_id": channel_name, "caption": caption}, files = {"photo": open(url, "rb")})
+	else:
+		r = ur.urlopen("https://api.telegram.org/bot"+api_token+"/sendPhoto?", up.urlencode({"chat_id": channel, "photo": url, "caption": caption}).encode("utf-8")).read()
 	print(r)
 	return
 
 def sendVideo(url, channel, api_token, caption = "New Post :)"):
-	r = ur.urlopen("https://api.telegram.org/bot"+api_token+"/sendVideo?", up.urlencode({"chat_id": channel, "video": url, "caption": caption}).encode("utf-8")).read()
+	if os.path.isfile(url):
+		print("Found local file: " + url)
+		r = requests.post("https://api.telegram.org/bot"+api_token+"/sendVideo?", data={"chat_id": channel_name, "caption": caption}, files = {"video": open(url, "rb")})
+	else:
+		r = ur.urlopen("https://api.telegram.org/bot"+api_token+"/sendVideo?", up.urlencode({"chat_id": channel, "video": url, "caption": caption}).encode("utf-8")).read()
 	print(r)
 	return
 
 if __name__ == '__main__':
 
-	channel_name = ""
+	channel_name = "@"
 	api_token_value = ""
 
 	if len(sys.argv) == 1:
@@ -43,11 +51,9 @@ if __name__ == '__main__':
 			sendPhoto(url = sys.argv[1], caption = sys.argv[2], channel = channel_name, api_token = api_token_value)
 	elif len(sys.argv) == 4:
 		if sys.argv[1] == "photo":
-			c = input("Caption:\n")
-			sendPhoto(url = sys.argv[3], caption = c, channel = channel_name, api_token = api_token_value)
+			sendPhoto(url = sys.argv[3], caption = sys.argv[2], channel = channel_name, api_token = api_token_value)
 		elif sys.argv[1] == "video":
-			c = input("Caption:\n")
-			sendVideo(url = sys.argv[3], caption = c, channel = channel_name, api_token = api_token_value)
+			sendVideo(url = sys.argv[3], caption = sys.argv[2], channel = channel_name, api_token = api_token_value)
 		else:
 			print("Wrong order of args, has to be media-info, caption, url")
 	else:
